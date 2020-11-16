@@ -26,7 +26,7 @@ class OrderService
             // 更新此地址的最后使用时间
             $address->update(['last_used_at' => Carbon::now()]);
             // 创建一个订单
-            $order   = new Order([
+            $order = new Order([
                 'address'      => [ // 将地址信息放入订单中
                                     'address'       => $address->full_address,
                                     'zip'           => $address->zip,
@@ -35,6 +35,7 @@ class OrderService
                 ],
                 'remark'       => $remark,
                 'total_amount' => 0,
+                'type'         => Order::TYPE_NORMAL,
             ]);
             // 订单关联到当前用户
             $order->user()->associate($user);
@@ -44,7 +45,7 @@ class OrderService
             $totalAmount = 0;
             // 遍历用户提交的 SKU
             foreach ($items as $data) {
-                $sku  = ProductSku::find($data['sku_id']);
+                $sku = ProductSku::find($data['sku_id']);
                 // 创建一个 OrderItem 并直接与当前订单关联
                 $item = $order->items()->make([
                     'amount' => $data['amount'],
@@ -103,6 +104,7 @@ class OrderService
                 ],
                 'remark'       => '',
                 'total_amount' => $sku->price * $amount,
+                'type'         => Order::TYPE_CROWDFUNDING,
             ]);
             // 订单关联到当前用户
             $order->user()->associate($user);

@@ -7,6 +7,7 @@ use App\Events\OrderReviewed;
 use App\Listeners\SendOrderPaidMail;
 use App\Listeners\UpdateProductRating;
 use App\Listeners\UpdateProductSoldCount;
+use App\Listeners\UpdateCrowdfundingProductProgress;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -26,6 +27,8 @@ class EventServiceProvider extends ServiceProvider
         OrderPaid::class => [
             UpdateProductSoldCount::class,
             SendOrderPaidMail::class,
+            UpdateCrowdfundingProductProgress::class,
+
         ],
         OrderReviewed::class => [
             UpdateProductRating::class,

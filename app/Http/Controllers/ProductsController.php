@@ -45,6 +45,8 @@ class ProductsController extends Controller
                 $params['body']['query']['bool']['filter'][] = ['term' => ['category_id' => $category->id]];
             }
         }
+
+
         if ($search = $request->input('search', '')) {
             // 将搜索词根据空格拆分成数组，并过滤掉空项
             $keywords = array_filter(explode(' ', $search));
@@ -67,6 +69,54 @@ class ProductsController extends Controller
                 ];
             }
         }
+
+        // 只有当用户有输入搜索词或者使用了类目筛选的时候才会做聚合
+        if($search || isset($category)){
+            $params['body']['aggs'] = [
+                'properties' => [
+                    'nested' => ['path' => 'properties',],
+                    'aggs'   => [
+                        'properties' => [
+                            'terms' => [
+                                'field' => 'properties.name',
+                            ],
+                            'aggs'  => [
+                                'value' => [
+                                    'terms' => ['field' => 'properties.value',],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+        }
+
+        $propertyFilters = []; //过滤的属性数组
+        if ($filterString = $request->input('filters')) {
+            // 将获取到的字符串用符号 | 拆分成数组
+            $filterArray = explode('|', $filterString);
+            foreach ($filterArray as $filter) {
+                // 将字符串用符号 : 拆分成两部分并且分别赋值给 $name 和 $value 两个变量
+                list($name, $value) = explode(':', $filter);
+                // 将用户筛选的属性添加到数组中
+                $propertyFilters[$name] = $value;
+
+                // 添加到 filter 类型中
+                $params['body']['query']['bool']['filter'][] = [
+                    // 由于我们要筛选的是 nested 类型下的属性，因此需要用 nested 查询
+                    'nested' => [
+                        // 指明 nested 字段
+                        'path'  => 'properties',
+                        'query' => [
+                            ['term' => ['properties.name' => $name]],
+                            ['term' => ['properties.value' => $value]],
+                        ],
+                    ],
+                ];
+            }
+        }
+
+
         $result = app('es')->search($params);
         $productIds = collect($result['hits']['hits'])->pluck('_id')->all();
         $products = Product::query()->whereIn('id',$productIds)
@@ -75,6 +125,21 @@ class ProductsController extends Controller
         $pager = new LengthAwarePaginator($products, $result['hits']['total']['value'], $perPage, $page, [
             'path' => route('products.index', false),
         ]);
+
+        $properties = [];
+        if(isset($result['aggregations'])){
+            $properties = collect($result['aggregations']['properties']['properties']['buckets'])
+                ->map(function($bucket){
+                    return [
+                        'key'=>$bucket['key'],
+                        'values'=>collect($bucket['value']['buckets'])->pluck('key')->all(),
+                    ];
+                })->filter(function($property) use($propertyFilters){
+                    // 过滤掉只剩下一个值 或者 已经在筛选条件里的属性
+                    return count($property['values']) > 1 && !isset($propertyFilters[$property['key']]) ;
+                });
+        }
+
         return view('products.index', [
             'products' => $pager,
             'filters'  => [
@@ -82,6 +147,8 @@ class ProductsController extends Controller
                 'order'  => $order,
             ],
             'category' => $category ?? null,
+            'properties'=>$properties,
+            'propertyFilters'=>$propertyFilters,
     ]);
 
         //传统搜索

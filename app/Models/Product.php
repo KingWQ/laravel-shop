@@ -45,6 +45,11 @@ class Product extends Model
         return $this->hasOne(CrowdfundingProduct::class);
     }
 
+    public function properties()
+    {
+        return $this->hasMany(ProductProperty::class);
+    }
+
     public function getImageUrlAttribute()
     {
         // 如果 image 字段本身就已经是完整的 url 就直接返回
@@ -52,5 +57,14 @@ class Product extends Model
             return $this->attributes['image'];
         }
         return \Storage::disk('public')->url($this->attributes['image']);
+    }
+
+    public function getGroupedPropertiesAttribute()
+    {
+        return $this->properties
+            ->groupBy('name')
+            ->map(function($properties){
+                return $properties->pluck('value')->all();
+            });
     }
 }

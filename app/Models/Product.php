@@ -69,6 +69,11 @@ class Product extends Model
             });
     }
 
+    public function scopeByIds($query, $ids)
+    {
+        return $query->whereIn('id', $ids)->orderByRaw(sprintf("FIND_IN_SET(id, '%s')", join(',', $ids)));
+    }
+
     //将商品模型转化为数组，商品数据写入到Elasticsearch
     public function toESArray()
     {

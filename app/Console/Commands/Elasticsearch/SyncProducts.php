@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 
 class SyncProducts extends Command
 {
-    protected $signature = 'es:sync-products';
+    protected $signature = 'es:sync-products {--index=products}';
     protected $description = '将商品数据同步到Elasticsearch';
 
 
@@ -31,7 +31,10 @@ class SyncProducts extends Command
                 foreach($products as $key=>$product){
                     $data = $product->toESArray();
                     $req['body'][] = [
-                        'index'=>['_index'=>'products','_id'=>$data['id']]
+                        'index'=>[
+                            '_index'=>$this->option('index'),
+                            '_id'=>$data['id']
+                        ]
                     ];
                     $req['body'][] = $data;
                 }

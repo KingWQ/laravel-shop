@@ -7,22 +7,24 @@ use Ramsey\Uuid\Uuid;
 
 class Order extends Model
 {
-    const REFUND_STATUS_PENDING = 'pending';
-    const REFUND_STATUS_APPLIED = 'applied';
+    const REFUND_STATUS_PENDING    = 'pending';
+    const REFUND_STATUS_APPLIED    = 'applied';
     const REFUND_STATUS_PROCESSING = 'processing';
-    const REFUND_STATUS_SUCCESS = 'success';
-    const REFUND_STATUS_FAILED = 'failed';
+    const REFUND_STATUS_SUCCESS    = 'success';
+    const REFUND_STATUS_FAILED     = 'failed';
 
-    const SHIP_STATUS_PENDING = 'pending';
+    const SHIP_STATUS_PENDING   = 'pending';
     const SHIP_STATUS_DELIVERED = 'delivered';
-    const SHIP_STATUS_RECEIVED = 'received';
+    const SHIP_STATUS_RECEIVED  = 'received';
 
-    const TYPE_NORMAL = 'normal';
+    const TYPE_NORMAL       = 'normal';
     const TYPE_CROWDFUNDING = 'crowdfunding';
+    const TYPE_SECKILL      = 'seckill';
 
-    public static $typeMap = [
-        self::TYPE_NORMAL => '普通商品订单',
+    public static $typeMap         = [
+        self::TYPE_NORMAL       => '普通商品订单',
         self::TYPE_CROWDFUNDING => '众筹商品订单',
+        self::TYPE_SECKILL      => '秒杀商品订单',
     ];
     public static $refundStatusMap = [
         self::REFUND_STATUS_PENDING    => '未退款',
@@ -106,7 +108,7 @@ class Order extends Model
         $prefix = date('YmdHis');
         for ($i = 0; $i < 10; $i++) {
             // 随机生成 6 位的数字
-            $no = $prefix.str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $no = $prefix . str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
             // 判断是否已经存在
             if (!static::query()->where('no', $no)->exists()) {
                 return $no;

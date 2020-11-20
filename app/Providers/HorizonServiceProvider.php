@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use Laravel\Horizon\Horizon;
 use Laravel\Horizon\HorizonApplicationServiceProvider;
 
@@ -23,10 +22,7 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
         // Horizon::routeSlackNotificationsTo('slack-webhook-url', '#channel');
 
         Horizon::auth(function () {
-            if (Auth::check()) {
-                return \Admin::user()->can('horizon');
-            }
-
+            return \Admin::user()->can('horizon');
         });
         // Horizon::night();
     }

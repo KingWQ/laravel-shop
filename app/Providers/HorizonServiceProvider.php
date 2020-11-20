@@ -22,15 +22,10 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
         // Horizon::routeMailNotificationsTo('example@example.com');
         // Horizon::routeSlackNotificationsTo('slack-webhook-url', '#channel');
 
-        Horizon::auth(function ($request) {
-            // 这里进行判断，根据需求自行选择
-
-            // 通过认证可以访问
+        Horizon::auth(function () {
             if (Auth::check()) {
-                return true;
+                return \Admin::user()->can('horizon');
             }
-
-
 
         });
         // Horizon::night();

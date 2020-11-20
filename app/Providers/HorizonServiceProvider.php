@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Encore\Admin\Admin;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Horizon\Horizon;
 use Laravel\Horizon\HorizonApplicationServiceProvider;
@@ -22,7 +23,7 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
         // Horizon::routeSlackNotificationsTo('slack-webhook-url', '#channel');
 
         Horizon::auth(function () {
-            return \Admin::user()->can('horizon');
+            return Admin::user()->can('horizon');
         });
         // Horizon::night();
     }
@@ -38,7 +39,7 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
     {
 
         Gate::define('viewHorizon', function ($user) {
-            dd(\Admin::user());
+            dd(Admin::user());
             return in_array($user->email, [
                 //
             ]);

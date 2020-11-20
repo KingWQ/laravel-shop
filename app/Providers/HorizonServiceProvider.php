@@ -22,7 +22,17 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
         // Horizon::routeMailNotificationsTo('example@example.com');
         // Horizon::routeSlackNotificationsTo('slack-webhook-url', '#channel');
 
+        Horizon::auth(function ($request) {
+            // 这里进行判断，根据需求自行选择
 
+            // 通过认证可以访问
+            if (Auth::check()) {
+                return true;
+            }
+
+
+
+        });
         // Horizon::night();
     }
 
@@ -36,7 +46,7 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
     protected function gate()
     {
 
-        Gate::define('viewHorizon', function ($user=null) {
+        Gate::define('viewHorizon', function ($user) {
             return in_array($user->email, [
                 //
             ]);

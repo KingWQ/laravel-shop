@@ -7,6 +7,7 @@ use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Facades\Log;
 
 class UsersController extends AdminController
 {
@@ -14,6 +15,7 @@ class UsersController extends AdminController
 
     protected function grid()
     {
+        Log::info(111);
         $grid = new Grid(new User);
 
         // 创建一个列名为 ID 的列，内容是用户的 id 字段

@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', '/products')->name('root');
 Route::get('products', 'ProductsController@index')->name('products.index');
 Route::get('products', 'ProductsController@index')->name('products.index');
+//当秒杀商品有剩余库存时才校验登录凭证
+Route::post('seckill_orders', 'OrdersController@seckill')->name('seckill_orders.store');
 
 Auth::routes(['verify' => true]);
 
@@ -50,7 +52,6 @@ Route::group(['middleware' => ['auth', 'verified']], function() {
     Route::get('coupon_codes/{code}', 'CouponCodesController@show')->name('coupon_codes.show');
 
     Route::post('crowdfunding_orders', 'OrdersController@crowdfunding')->name('crowdfunding_orders.store');
-    Route::post('seckill_orders', 'OrdersController@seckill')->name('seckill_orders.store');
     Route::get('installments', 'InstallmentsController@index')->name('installments.index');
     Route::get('installments/{installment}', 'InstallmentsController@show')->name('installments.show');
     Route::get('installments/{installment}/alipay', 'InstallmentsController@payByAlipay')->name('installments.alipay');

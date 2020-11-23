@@ -137,22 +137,22 @@ class OrderService
     }
 
     //秒杀下单
-    public function seckill(User $user, UserAddress $address, ProductSku $sku)
+    public function seckill(User $user, array $addressData, ProductSku $sku)
     {
         // 开启事务
-        $order = \DB::transaction(function () use ( $sku, $user, $address) {
-            $address->update(['last_used_at' => Carbon::now()]);
+        $order = \DB::transaction(function () use ( $sku, $user, $addressData) {
             // 扣减对应 SKU 库存
             if ($sku->decreaseStock(1) <= 0) {
                 throw new InvalidRequestException('该商品库存不足');
             }
 
             $order = new Order([
-                'address'      => [
-                    'address'       => $address->full_address,
-                    'zip'           => $address->zip,
-                    'contact_name'  => $address->contact_name,
-                    'contact_phone' => $address->contact_phone,
+                // 扣减对应 SKU 库存
+                'address'      => [ // address 字段直接从 $addressData 数组中读取
+                    'address'       => $addressData['province'].$addressData['city'].$addressData['district'].$addressData['address'],
+                    'zip'           => $addressData['zip'],
+                    'contact_name'  => $addressData['contact_name'],
+                    'contact_phone' => $addressData['contact_phone'],
                 ],
                 'remark'       => '',
                 'total_amount' => $sku->price,
